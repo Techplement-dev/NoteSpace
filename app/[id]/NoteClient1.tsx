@@ -10,13 +10,9 @@ export default function NoteClient({ noteId }: { noteId: string }) {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [lastSaved, setLastSaved] = useState<string | null>(null);
-  const [showRenameBox, setShowRenameBox] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showRenameBox, setShowRenameBox] = useState(false); // 👈 New state for custom URL
   const [newUrlName, setNewUrlName] = useState("");
-  const [darkMode, setDarkMode] = useState(false);
-  const [expiryTime, setExpiryTime] = useState<string>("never");
-  const [expiryTimestamp, setExpiryTimestamp] = useState<number | null>(null);
-  const [timeLeft, setTimeLeft] = useState<string>("");
-
   const router = useRouter();
   const searchParams = useSearchParams();
   const isReadOnly = searchParams.get("readonly") === "true";
@@ -37,10 +33,6 @@ export default function NoteClient({ noteId }: { noteId: string }) {
           } else {
             setContent(data.note.content || "");
             setIsLocked(false);
-          }
-
-          if (data.note.expiryTimestamp) {
-            setExpiryTimestamp(data.note.expiryTimestamp);
           }
         }
       } catch (err) {
@@ -81,7 +73,7 @@ export default function NoteClient({ noteId }: { noteId: string }) {
       const res = await fetch("/api/notes/new", { method: "POST" });
       if (!res.ok) throw new Error("Failed to create new note");
       const data = await res.json();
-      if (data.id) window.open(`/${data.id}`, "_blank");
+      if (data.id) router.push(`/${data.id}`);
     } catch (err) {
       console.error("Error creating new note:", err);
     }
@@ -89,7 +81,10 @@ export default function NoteClient({ noteId }: { noteId: string }) {
 
   // ---------- Password Functions ----------
   const lockNote = async () => {
-    if (!password) return alert("Please enter a password.");
+    if (!password) {
+      alert("Please enter a password to lock this note.");
+      return;
+    }
     try {
       const res = await fetch(`/api/notes/${noteId}`, {
         method: "PUT",
@@ -114,25 +109,32 @@ export default function NoteClient({ noteId }: { noteId: string }) {
         setIsLocked(false);
         setShowPasswordPrompt(false);
         setPassword("");
-      } else alert("❌ Incorrect password");
+      } else {
+        alert("❌ Incorrect password");
+      }
     } catch (err) {
       console.error("Error unlocking note:", err);
     }
   };
 
-  // ---------- Share Links ----------
   const copyEditableLink = () => {
-    navigator.clipboard.writeText(`${window.location.origin}/${noteId}`);
+    const editableURL = `${window.location.origin}/${noteId}`;
+    navigator.clipboard.writeText(editableURL);
     alert("✅ Editable link copied!");
   };
+
   const copyReadOnlyLink = () => {
-    navigator.clipboard.writeText(`${window.location.origin}/${noteId}?readonly=true`);
+    const readonlyURL = `${window.location.origin}/${noteId}?readonly=true`;
+    navigator.clipboard.writeText(readonlyURL);
     alert("🔗 Read-only link copied!");
   };
 
   // ---------- Customize URL ----------
   const customizeUrl = async () => {
-    if (!newUrlName) return alert("Enter a valid name.");
+    if (!newUrlName) {
+      alert("Please enter a valid name.");
+      return;
+    }
     try {
       const res = await fetch(`/api/notes/${noteId}`, {
         method: "PATCH",
@@ -149,48 +151,10 @@ export default function NoteClient({ noteId }: { noteId: string }) {
     }
   };
 
-  // ---------- Expiry Timer ----------
-  const handleExpiryChange = async (value: string) => {
-    setExpiryTime(value);
-    let expiryTimestamp = null;
-    if (value === "1h") expiryTimestamp = Date.now() + 3600000;
-    else if (value === "1d") expiryTimestamp = Date.now() + 86400000;
-    else if (value === "7d") expiryTimestamp = Date.now() + 604800000;
-
-    setExpiryTimestamp(expiryTimestamp);
-    await fetch(`/api/notes/${noteId}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ expiryTimestamp }),
-    });
-  };
-
-  useEffect(() => {
-    if (!expiryTimestamp) return;
-    const interval = setInterval(() => {
-      const remaining = expiryTimestamp - Date.now();
-      if (remaining <= 0) {
-        setTimeLeft("Expired");
-        clearInterval(interval);
-        fetch(`/api/notes/${noteId}`, { method: "DELETE" });
-        alert("🗑 This note has expired!");
-        router.push("/");
-      } else {
-        const hrs = Math.floor(remaining / 3600000);
-        const mins = Math.floor((remaining % 3600000) / 60000);
-        const secs = Math.floor((remaining % 60000) / 1000);
-        setTimeLeft(`${hrs}h ${mins}m ${secs}s`);
-      }
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [expiryTimestamp, noteId, router]);
-
-  // ---------- UI ----------
   return (
     <div
       style={{
-        backgroundColor: darkMode ? "#1e1e1e" : "#f8f9fb",
-        color: darkMode ? "#eee" : "#333",
+        backgroundColor: "#f8f9fb",
         height: "100vh",
         display: "flex",
         justifyContent: "center",
@@ -210,7 +174,7 @@ export default function NoteClient({ noteId }: { noteId: string }) {
           marginBottom: "10px",
         }}
       >
-        <h2 style={{ color: darkMode ? "#ddd" : "#444", fontWeight: "500" }}>📝 NoteSpace</h2>
+        <h2 style={{ color: "#444", fontWeight: "500" }}>📝 NoteSpace</h2>
 
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           {saving && <span style={{ color: "#999" }}>Saving...</span>}
@@ -243,37 +207,32 @@ export default function NoteClient({ noteId }: { noteId: string }) {
                   cursor: "pointer",
                 }}
               >
-                ✏ Customize URL
+                ✏️ Customize URL
               </button>
-
-              <span
-                onClick={() => setDarkMode(!darkMode)}
-                style={{ cursor: "pointer", fontSize: "20px" }}
-                title="Toggle Dark/Light Mode"
-              >
-                {darkMode ? "🌞" : "🌙"}
-              </span>
-
-              <span
-                onClick={createNewNote}
-                style={{
-                  cursor: "pointer",
-                  fontSize: "22px",
-                  backgroundColor: "#c27ad8",
-                  color: "#fff",
-                  width: "32px",
-                  height: "32px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  borderRadius: "50%",
-                  boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
-                }}
-                title="New Note"
-              >
-                ＋
-              </span>
             </>
+          )}
+
+          {!isReadOnly && (
+            <span
+              onClick={createNewNote}
+              style={{
+                cursor: "pointer",
+                fontSize: "22px",
+                backgroundColor: "#c27ad8",
+                color: "#fff",
+                width: "32px",
+                height: "32px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                borderRadius: "50%",
+                boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
+                userSelect: "none",
+              }}
+              title="New Note"
+            >
+              ＋
+            </span>
           )}
         </div>
       </div>
@@ -281,20 +240,26 @@ export default function NoteClient({ noteId }: { noteId: string }) {
       {/* ---------- Text Area ---------- */}
       <div
         style={{
-          backgroundColor: darkMode ? "#2b2b2b" : "#fff",
+          backgroundColor: "#fff",
           width: "85%",
           height: "80%",
           border: "1px solid #ddd",
           boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
           borderRadius: "6px",
           overflow: "hidden",
+          display: "flex",
+          flexDirection: "column",
           position: "relative",
         }}
       >
         <textarea
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          placeholder={isLocked ? "🔒 Protected note" : "Start typing..."}
+          placeholder={
+            isLocked
+              ? "🔒 This note is protected. Please enter password."
+              : "Start typing..."
+          }
           readOnly={isLocked || isReadOnly}
           style={{
             width: "100%",
@@ -305,127 +270,130 @@ export default function NoteClient({ noteId }: { noteId: string }) {
             fontSize: "15px",
             resize: "none",
             fontFamily: "monospace",
-            color: darkMode ? "#eee" : "#333",
-            backgroundColor: darkMode ? "#2b2b2b" : "#fff",
+            color: isLocked ? "#888" : "#333",
+            backgroundColor: isLocked ? "#f6f6f6" : "#fff",
           }}
         />
 
-        {expiryTimestamp && (
+        {/* ---------- Password Modal ---------- */}
+        {showPasswordPrompt && (
           <div
             style={{
               position: "absolute",
-              bottom: "8px",
-              right: "12px",
-              color: darkMode ? "#bbb" : "#666",
-              fontSize: "13px",
-            }}
-          >
-            ⏳ {timeLeft}
-          </div>
-        )}
-      </div>
-
-      {/* ---------- Bottom Section ---------- */}
-      <div style={{ marginTop: "10px", display: "flex", gap: "10px", alignItems: "center" }}>
-        {!isReadOnly && (
-          <>
-            <button onClick={copyEditableLink}>🔗 Editable Link</button>
-            <button onClick={copyReadOnlyLink}>↗ Share Link</button>
-
-            <label>Expire in —</label>
-            <select
-              value={expiryTime}
-              onChange={(e) => handleExpiryChange(e.target.value)}
-              style={{ padding: "4px", borderRadius: "4px" }}
-            >
-              <option value="never">Never</option>
-              <option value="1h">1 hour</option>
-              <option value="1d">1 day</option>
-              <option value="7d">7 days</option>
-            </select>
-          </>
-        )}
-      </div>
-
-      {/* ---------- Password Modal ---------- */}
-      {showPasswordPrompt && (
-        <div
-          style={{
-            position: "absolute",
-            top: 0, left: 0, width: "100%", height: "100%",
-            background: "rgba(0,0,0,0.3)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <div
-            style={{
-              background: darkMode ? "#2b2b2b" : "#fff",
-              padding: "20px",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              backgroundColor: "#fff",
+              padding: "24px",
               borderRadius: "8px",
-              boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
-              width: "300px",
-              textAlign: "center",
+              boxShadow: "0 4px 15px rgba(0,0,0,0.2)",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              zIndex: 10,
             }}
           >
-            <h3>{isLocked ? "Unlock Note" : "Set Password"}</h3>
-            <input
-              type="password"
-              placeholder="Enter password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              style={{ width: "100%", padding: "8px", margin: "10px 0" }}
-            />
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <h3 style={{ marginBottom: "10px" }}>
+              {isLocked ? "Enter Password to Unlock" : "Set a Password"}
+            </h3>
+
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                border: "1px solid #ccc",
+                borderRadius: "4px",
+                paddingRight: "8px",
+                marginBottom: "10px",
+                width: "220px",
+              }}
+            >
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter password"
+                style={{
+                  flex: 1,
+                  padding: "8px",
+                  border: "none",
+                  outline: "none",
+                }}
+              />
+              <span
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  cursor: "pointer",
+                  color: "#888",
+                  fontSize: "16px",
+                }}
+                title={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? "🙈" : "👁️"}
+              </span>
+            </div>
+
+            <div style={{ display: "flex", gap: "8px" }}>
               {isLocked ? (
                 <button onClick={unlockNote}>Unlock</button>
               ) : (
-                <button onClick={lockNote}>Set</button>
+                <button onClick={lockNote}>Lock</button>
               )}
               <button onClick={() => setShowPasswordPrompt(false)}>Cancel</button>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* ---------- Rename Modal ---------- */}
-      {showRenameBox && (
-        <div
-          style={{
-            position: "absolute",
-            top: 0, left: 0, width: "100%", height: "100%",
-            background: "rgba(0,0,0,0.3)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
+        {/* ---------- Customize URL Modal ---------- */}
+        {showRenameBox && (
           <div
             style={{
-              background: darkMode ? "#2b2b2b" : "#fff",
-              padding: "20px",
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              backgroundColor: "#fff",
+              padding: "24px",
               borderRadius: "8px",
-              boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
-              width: "300px",
-              textAlign: "center",
+              boxShadow: "0 4px 15px rgba(0,0,0,0.2)",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              zIndex: 15,
             }}
           >
-            <h3>Customize URL</h3>
+            <h3 style={{ marginBottom: "10px" }}>Customize your Note URL</h3>
             <input
               type="text"
-              placeholder="Enter new URL name"
               value={newUrlName}
               onChange={(e) => setNewUrlName(e.target.value)}
-              style={{ width: "100%", padding: "8px", margin: "10px 0" }}
+              placeholder="Enter new URL (e.g. abc123)"
+              style={{
+                padding: "8px",
+                border: "1px solid #ccc",
+                borderRadius: "4px",
+                marginBottom: "12px",
+                width: "220px",
+              }}
             />
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <div style={{ display: "flex", gap: "8px" }}>
               <button onClick={customizeUrl}>Save</button>
               <button onClick={() => setShowRenameBox(false)}>Cancel</button>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
+
+      {/* ---------- Bottom Share Buttons ---------- */}
+      <div style={{ marginTop: "10px", display: "flex", gap: "10px" }}>
+        {!isReadOnly && (
+          <>
+            <button onClick={copyEditableLink}>🔗 Editable Link</button>
+            <button onClick={copyReadOnlyLink}>↗ Share Link</button>
+          </>
+        )}
+        {isReadOnly && <button onClick={copyReadOnlyLink}>↗ Share Link</button>}
+      </div>
     </div>
   );
 }
