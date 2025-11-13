@@ -31,7 +31,6 @@ export default function NoteClient({
   const searchParams = useSearchParams();
 
   //  Fetch note 
-
   useEffect(() => {
     if (!noteId) return;
     const fetchNote = async () => {
@@ -124,7 +123,6 @@ export default function NoteClient({
   }, [content, noteId, isReadOnly, isLocked, expiryTimestamp, router]);
 
   // Create new note 
-
   const createNewNote = async () => {
     try {
       const res = await fetch("/api/notes/new", { method: "POST" });
@@ -137,7 +135,6 @@ export default function NoteClient({
   };
 
   // Password
-
   const lockNote = async () => {
     if (!password) return alert("Please enter a password.");
     try {
@@ -179,7 +176,6 @@ export default function NoteClient({
   };
 
   //Share Links 
-
   const copyEditableLink = async () => {
   if (typeof window === "undefined" || !navigator?.clipboard) {
     console.error("Clipboard API not available");
@@ -214,7 +210,6 @@ export default function NoteClient({
 
 
   //Customize URL 
-
   const customizeUrl = async () => {
     if (!newUrlName) return alert("Enter a valid name.");
     try {
@@ -234,7 +229,6 @@ export default function NoteClient({
   };
 
   // Expiry Timer 
-
   const handleExpiryChange = async (value: string) => {
     setExpiryTime(value);
     let newExpiryTimestamp: number | null = null;
@@ -253,7 +247,6 @@ export default function NoteClient({
   };
 
   //Countdown 
-
   useEffect(() => {
     if (!expiryTimestamp) {
       setTimeLeft("");
@@ -492,12 +485,12 @@ export default function NoteClient({
 
 </div>
 
-    {/* New Note Button + Text */}
+    {/* New Note Button + Text mobile */}
 
 <div
   onClick={createNewNote}
   className="
-    flex items-center gap-2 md:gap-3
+    md:hidden flex items-center gap-2 md:gap-3
     px-2 py-1 rounded-lg
     border border-purple-500/30
     bg-gradient-to-r from-purple-500/10 to-indigo-500/10
