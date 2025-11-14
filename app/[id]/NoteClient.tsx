@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
-import {FiLock, FiPlus, FiUnlock, FiSave, FiX, FiLink2, FiShare2, FiClock } from "react-icons/fi";
+import {FiLock, FiEdit3, FiPlus, FiUnlock, FiSave, FiX, FiLink2, FiShare2, FiClock } from "react-icons/fi";
 
 export default function NoteClient({
   noteId,
@@ -298,17 +298,31 @@ export default function NoteClient({
   `}
 >
   {/* Title */}
-  <h2
-   className={`
+<h2
+ className={`
     flex items-center justify-center sm:justify-start
-    gap-2 text-[1.6rem] font-bold tracking-wide
-    ${darkMode ? "text-gray-200" : "text-gray-900"}
+    gap-2 text-[1.6rem] font-extrabold tracking-wide
     text-center sm:text-left w-full sm:w-auto
     transition-all duration-300
   `}
+>
+  <FiEdit3
+   className={`text-[1.8rem] ${
+      darkMode ? "text-purple-400 drop-shadow-[0_0_4px_rgba(168,85,247,0.6)]" : "text-purple-600"
+    } transition-transform duration-300 group-hover:rotate-6`}
+ 
+  />
+
+  {/* Colored NoteSpace text */}
+  <span
+    className="
+      bg-gradient-to-r from-purple-600 to-purple-400
+      bg-clip-text text-transparent
+    "
   >
-    📝 NoteSpace
-  </h2>
+    NoteSpace
+  </span>
+</h2>
 
   {/* Right Controls */}
   <div
@@ -486,7 +500,6 @@ export default function NoteClient({
 </div>
 
     {/* New Note Button + Text mobile */}
-
 <div
   onClick={createNewNote}
   className="
@@ -531,8 +544,7 @@ export default function NoteClient({
 </div>
 
 
-      {/* Bottom Section */}
-
+    {/* Bottom Section */}
    <div
   className={`
     mt-4 flex flex-wrap items-center justify-start gap-3 py-2.5
@@ -711,8 +723,7 @@ export default function NoteClient({
   </div>
 )}
 
-      {/*  Rename Modal */}
-      
+      {/*  Rename Modal */}  
      {showRenameBox && (
   <div
     className="
