@@ -16,7 +16,6 @@ export default function NoteClient({
   const [isLocked, setIsLocked] = useState(false);
   const [showPasswordPrompt, setShowPasswordPrompt] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [showUrl, setShowUrl] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [lastSaved, setLastSaved] = useState<string | null>(null);
@@ -316,7 +315,7 @@ export default function NoteClient({
   {/* Colored NoteSpace text */}
   <span
     className="
-      bg-gradient-to-r from-purple-600 to-purple-400
+      bg-gradient-to-r from-purple-500 to-purple-200
       bg-clip-text text-transparent
     "
   >
@@ -750,7 +749,7 @@ export default function NoteClient({
       {/* Input Field */}
       <div className="relative w-full flex justify-center">
         <input
-          type={showUrl ? "text" : "password"}
+          type="text"
           placeholder="Enter new URL name"
           value={newUrlName}
           onChange={(e) => setNewUrlName(e.target.value)}
@@ -763,16 +762,6 @@ export default function NoteClient({
             }
           `}
         />
-        <span
-          onClick={() => setShowUrl(!showUrl)}
-          className={`
-            absolute  mr-5 right-[10%] top-1/2 -translate-y-1/2 cursor-pointer text-[20px]
-            ${darkMode ? "text-gray-400 hover:text-gray-200" : "text-gray-600 hover:text-gray-800"}
-            transition-colors
-          `}
-        >
-          {showUrl ? <AiOutlineEyeInvisible /> : <AiOutlineEye />}
-        </span>
       </div>
 
       {/* Buttons */}
