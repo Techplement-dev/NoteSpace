@@ -32,7 +32,7 @@ Choose whether the shared link allows editing or only viewing.
 
 Toggle between light and dark themes for comfortable viewing.
 
-⏳ Temporary Notes (Optional)
+⏳ Temporary Notes
 
 Notes can expire automatically after:
 
@@ -140,3 +140,4 @@ Editing disabled
 ## 🚀 Deployment
 
 NoteSpace is deployed on Vercel — both frontend and backend run serverlessly with Next.js API routes.
+
