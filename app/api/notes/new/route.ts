@@ -13,12 +13,8 @@ export async function POST(req: Request) {
   try {
     await dbConnect();
 
-<<<<<<< HEAD
     // Safely parse body if present
 
-=======
-    // ✅ Safely parse body if present
->>>>>>> 780461f4a5f7a0a7aec153226935fdca1fcf335e
     let body: NoteRequest = {};
     try {
       body = await req.json();
@@ -28,23 +24,15 @@ export async function POST(req: Request) {
 
     const { content = "", password = "", editable = true } = body;
 
-<<<<<<< HEAD
     // Generate unique note ID
 
-=======
-    // ✅ Generate unique note ID
->>>>>>> 780461f4a5f7a0a7aec153226935fdca1fcf335e
     const uniqueId = nanoid(10);
 
     const expiryDate = new Date();
     expiryDate.setDate(expiryDate.getDate() + 7);
 
-<<<<<<< HEAD
     //Create a new note document in MongoDB
 
-=======
-    // ✅ Create a new note document in MongoDB
->>>>>>> 780461f4a5f7a0a7aec153226935fdca1fcf335e
     const note = await Note.create({
       _id: uniqueId,
       content,
@@ -53,12 +41,8 @@ export async function POST(req: Request) {
       expiresAt: expiryDate,
     });
 
-<<<<<<< HEAD
     // Respond with the new note info
     
-=======
-    // ✅ Respond with the new note info
->>>>>>> 780461f4a5f7a0a7aec153226935fdca1fcf335e
     return NextResponse.json(
       {
         message: "Note created successfully",
@@ -74,8 +58,4 @@ export async function POST(req: Request) {
       { status: 500 }
     );
   }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 780461f4a5f7a0a7aec153226935fdca1fcf335e

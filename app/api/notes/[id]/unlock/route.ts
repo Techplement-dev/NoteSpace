@@ -29,8 +29,4 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     console.error("Error verifying password:", error);
     return NextResponse.json({ error: "Failed to verify password" }, { status: 500 });
   }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 780461f4a5f7a0a7aec153226935fdca1fcf335e

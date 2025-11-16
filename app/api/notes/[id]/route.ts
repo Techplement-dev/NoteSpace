@@ -1,31 +1,21 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/dbConnect";
 import Note from "@/models/Note";
-<<<<<<< HEAD
 import bcrypt from "bcryptjs";
 
 // Helper for Next.js async context
 
-=======
-
-// ⚙️ Helper to unwrap params safely
->>>>>>> 780461f4a5f7a0a7aec153226935fdca1fcf335e
 async function getParams(promiseParams: any) {
   return await promiseParams;
 }
 
-<<<<<<< HEAD
 /*  GET — Fetch a note (with expiry + password checks) */
 
-=======
-// ---------- GET (Fetch a single note) ----------
->>>>>>> 780461f4a5f7a0a7aec153226935fdca1fcf335e
 export async function GET(req: Request, context: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await getParams(context.params);
     await dbConnect();
 
-<<<<<<< HEAD
     // Find note by either _id or customId
 
     const note = await Note.findOne({ $or: [{ _id: id }, { customId: id }] });
@@ -61,14 +51,6 @@ export async function GET(req: Request, context: { params: Promise<{ id: string 
       if (!isMatch) {
         return NextResponse.json({ error: "Incorrect password" }, { status: 403 });
       }
-=======
-    const note = await Note.findOne({ _id: id });
-    if (!note) return NextResponse.json({ error: "Note not found" }, { status: 404 });
-
-    // Check expiry
-    if (note.expiresAt && new Date(note.expiresAt) < new Date()) {
-      return NextResponse.json({ error: "This note has expired." }, { status: 410 });
->>>>>>> 780461f4a5f7a0a7aec153226935fdca1fcf335e
     }
 
     return NextResponse.json({ note }, { status: 200 });
@@ -78,19 +60,14 @@ export async function GET(req: Request, context: { params: Promise<{ id: string 
   }
 }
 
-<<<<<<< HEAD
 /*  PUT — Update note content, password, or expiry */
 
-=======
-// ---------- PUT (Update note content or password) ----------
->>>>>>> 780461f4a5f7a0a7aec153226935fdca1fcf335e
 export async function PUT(req: Request, context: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await getParams(context.params);
     await dbConnect();
 
     const body = await req.json();
-<<<<<<< HEAD
     const { content, password, expiryTimestamp } = body;
     const updateFields: Record<string, any> = {};
 
@@ -111,21 +88,10 @@ export async function PUT(req: Request, context: { params: Promise<{ id: string 
 
     const updatedNote = await Note.findOneAndUpdate(
       { $or: [{ _id: id }, { customId: id }] },
-=======
-    const { content, password } = body;
-
-    const updateFields: Record<string, any> = {};
-    if (content !== undefined) updateFields.content = content;
-    if (password !== undefined) updateFields.password = password;
-
-    const updatedNote = await Note.findOneAndUpdate(
-      { _id: id },
->>>>>>> 780461f4a5f7a0a7aec153226935fdca1fcf335e
       { $set: updateFields },
       { new: true }
     );
 
-<<<<<<< HEAD
     if (!updatedNote) {
       return NextResponse.json({ error: "Note not found" }, { status: 404 });
     }
@@ -134,24 +100,14 @@ export async function PUT(req: Request, context: { params: Promise<{ id: string 
       { message: "Note updated successfully", note: updatedNote },
       { status: 200 }
     );
-=======
-    if (!updatedNote) return NextResponse.json({ error: "Note not found" }, { status: 404 });
-
-    console.log(`💾 Updated note: ${id}`, updateFields);
-    return NextResponse.json({ message: "Note updated successfully", note: updatedNote }, { status: 200 });
->>>>>>> 780461f4a5f7a0a7aec153226935fdca1fcf335e
   } catch (error) {
     console.error("Error updating note:", error);
     return NextResponse.json({ error: "Failed to update note" }, { status: 500 });
   }
 }
 
-<<<<<<< HEAD
 /* PATCH — Rename / Customize Note URL */
 
-=======
-// ---------- PATCH (Rename / Customize Note URL) ----------
->>>>>>> 780461f4a5f7a0a7aec153226935fdca1fcf335e
 export async function PATCH(req: Request, context: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await getParams(context.params);
@@ -162,7 +118,6 @@ export async function PATCH(req: Request, context: { params: Promise<{ id: strin
       return NextResponse.json({ error: "Invalid new ID" }, { status: 400 });
     }
 
-<<<<<<< HEAD
     // Check if the new customId already exists
 
     const existing = await Note.findOne({ customId: newId });
@@ -176,21 +131,10 @@ export async function PATCH(req: Request, context: { params: Promise<{ id: strin
     // Find by either _id or customId
 
     const note = await Note.findOne({ $or: [{ _id: id }, { customId: id }] });
-=======
-    // Check if the new ID already exists
-    const existing = await Note.findOne({ _id: newId });
-    if (existing) {
-      return NextResponse.json({ error: "This custom name is already taken." }, { status: 409 });
-    }
-
-    // Find the old note
-    const note = await Note.findOne({ _id: id });
->>>>>>> 780461f4a5f7a0a7aec153226935fdca1fcf335e
     if (!note) {
       return NextResponse.json({ error: "Note not found" }, { status: 404 });
     }
 
-<<<<<<< HEAD
     // Assign new customId
 
     note.customId = newId;
@@ -200,30 +144,11 @@ export async function PATCH(req: Request, context: { params: Promise<{ id: strin
       { message: "Note ID updated successfully", newId },
       { status: 200 }
     );
-=======
-    // Duplicate the note with the new ID
-    const newNote = new Note({
-      _id: newId,
-      content: note.content,
-      password: note.password,
-      editable: note.editable,
-      expiresAt: note.expiresAt,
-    });
-    await newNote.save();
-
-    // Delete the old note
-    await Note.deleteOne({ _id: id });
-
-    console.log(`🔗 Note ID changed from "${id}" → "${newId}"`);
-
-    return NextResponse.json({ message: "Note ID updated successfully", newId }, { status: 200 });
->>>>>>> 780461f4a5f7a0a7aec153226935fdca1fcf335e
   } catch (error) {
     console.error("Error renaming note:", error);
     return NextResponse.json({ error: "Failed to rename note" }, { status: 500 });
   }
 }
-<<<<<<< HEAD
 
 /*  DELETE — Remove a note manually */
 
@@ -240,5 +165,3 @@ export async function DELETE(req: Request, context: { params: Promise<{ id: stri
     return NextResponse.json({ error: "Failed to delete note" }, { status: 500 });
   }
 }
-=======
->>>>>>> 780461f4a5f7a0a7aec153226935fdca1fcf335e
