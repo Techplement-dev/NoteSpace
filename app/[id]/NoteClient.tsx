@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+<<<<<<< HEAD
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import {FiLock, FiEdit3, FiPlus, FiUnlock, FiSave, FiX, FiLink2, FiShare2, FiClock } from "react-icons/fi";
 
@@ -11,30 +12,48 @@ export default function NoteClient({
   noteId: string;
   isReadOnly?: boolean
 })  {
+=======
+
+export default function NoteClient({ noteId }: { noteId: string }) {
+>>>>>>> 780461f4a5f7a0a7aec153226935fdca1fcf335e
   const [content, setContent] = useState("");
   const [password, setPassword] = useState("");
   const [isLocked, setIsLocked] = useState(false);
   const [showPasswordPrompt, setShowPasswordPrompt] = useState(false);
+<<<<<<< HEAD
   const [showPassword, setShowPassword] = useState(false);
+=======
+>>>>>>> 780461f4a5f7a0a7aec153226935fdca1fcf335e
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [lastSaved, setLastSaved] = useState<string | null>(null);
   const [showRenameBox, setShowRenameBox] = useState(false);
   const [newUrlName, setNewUrlName] = useState("");
+<<<<<<< HEAD
   const [darkMode, setDarkMode] = useState(true);
+=======
+  const [darkMode, setDarkMode] = useState(false);
+>>>>>>> 780461f4a5f7a0a7aec153226935fdca1fcf335e
   const [expiryTime, setExpiryTime] = useState<string>("never");
   const [expiryTimestamp, setExpiryTimestamp] = useState<number | null>(null);
   const [timeLeft, setTimeLeft] = useState<string>("");
 
   const router = useRouter();
   const searchParams = useSearchParams();
+<<<<<<< HEAD
 
   //  Fetch note 
+=======
+  const isReadOnly = searchParams.get("readonly") === "true";
+
+  // ---------- Fetch note ----------
+>>>>>>> 780461f4a5f7a0a7aec153226935fdca1fcf335e
   useEffect(() => {
     if (!noteId) return;
     const fetchNote = async () => {
       try {
         const res = await fetch(`/api/notes/${noteId}`);
+<<<<<<< HEAD
         if (res.status === 401) {
           alert("🔒 This note is password protected. Please enter the password.");
           setIsLocked(true);
@@ -89,6 +108,34 @@ export default function NoteClient({
     if (!noteId || isReadOnly || isLocked) return;
     if (expiryTimestamp && expiryTimestamp <= Date.now()) return;
 
+=======
+        if (!res.ok) throw new Error("Failed to fetch note");
+        const data = await res.json();
+
+        if (data.note) {
+          if (data.note.password) {
+            setIsLocked(true);
+            setShowPasswordPrompt(true);
+          } else {
+            setContent(data.note.content || "");
+            setIsLocked(false);
+          }
+
+          if (data.note.expiryTimestamp) {
+            setExpiryTimestamp(data.note.expiryTimestamp);
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching note:", err);
+      }
+    };
+    fetchNote();
+  }, [noteId]);
+
+  // ---------- Auto-save ----------
+  useEffect(() => {
+    if (!noteId || isReadOnly || isLocked) return;
+>>>>>>> 780461f4a5f7a0a7aec153226935fdca1fcf335e
     const timeout = setTimeout(async () => {
       try {
         setSaving(true);
@@ -98,6 +145,7 @@ export default function NoteClient({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ content }),
         });
+<<<<<<< HEAD
 
         if (!res.ok) {
           if (res.status === 404 || res.status === 410) {
@@ -108,6 +156,9 @@ export default function NoteClient({
           throw new Error(`Failed to save (${res.status})`);
         }
 
+=======
+        if (!res.ok) throw new Error(`Failed to save (${res.status})`);
+>>>>>>> 780461f4a5f7a0a7aec153226935fdca1fcf335e
         setSaving(false);
         setSaved(true);
         setLastSaved(new Date().toLocaleTimeString());
@@ -117,11 +168,18 @@ export default function NoteClient({
         setSaving(false);
       }
     }, 2000);
+<<<<<<< HEAD
 
     return () => clearTimeout(timeout);
   }, [content, noteId, isReadOnly, isLocked, expiryTimestamp, router]);
 
   // Create new note 
+=======
+    return () => clearTimeout(timeout);
+  }, [content, noteId, isReadOnly, isLocked]);
+
+  // ---------- Create new note ----------
+>>>>>>> 780461f4a5f7a0a7aec153226935fdca1fcf335e
   const createNewNote = async () => {
     try {
       const res = await fetch("/api/notes/new", { method: "POST" });
@@ -133,19 +191,29 @@ export default function NoteClient({
     }
   };
 
+<<<<<<< HEAD
   // Password
+=======
+  // ---------- Password Functions ----------
+>>>>>>> 780461f4a5f7a0a7aec153226935fdca1fcf335e
   const lockNote = async () => {
     if (!password) return alert("Please enter a password.");
     try {
       const res = await fetch(`/api/notes/${noteId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
+<<<<<<< HEAD
 
         // Hashing done in backend — only send plain once
 
         body: JSON.stringify({ password }),
       });
       if (!res.ok) throw new Error("Failed to set password");
+=======
+        body: JSON.stringify({ password }),
+      });
+      if (!res.ok) throw new Error("Failed to lock note");
+>>>>>>> 780461f4a5f7a0a7aec153226935fdca1fcf335e
       alert("🔒 Password set successfully!");
       setShowPasswordPrompt(false);
       setPassword("");
@@ -156,6 +224,7 @@ export default function NoteClient({
 
   const unlockNote = async () => {
     try {
+<<<<<<< HEAD
       const res = await fetch(`/api/notes/${noteId}?password=${password}`);
       const data = await res.json();
       if (res.status === 200 && data.note) {
@@ -169,11 +238,22 @@ export default function NoteClient({
         if (data.note.expiresAt)
           setExpiryTimestamp(new Date(data.note.expiresAt).getTime());
       } else alert(data.error || "❌ Incorrect password");
+=======
+      const res = await fetch(`/api/notes/${noteId}`);
+      const noteData = await res.json();
+      if (noteData.note.password === password) {
+        setContent(noteData.note.content || "");
+        setIsLocked(false);
+        setShowPasswordPrompt(false);
+        setPassword("");
+      } else alert("❌ Incorrect password");
+>>>>>>> 780461f4a5f7a0a7aec153226935fdca1fcf335e
     } catch (err) {
       console.error("Error unlocking note:", err);
     }
   };
 
+<<<<<<< HEAD
   //Share Links 
   const copyEditableLink = async () => {
   if (typeof window === "undefined" || !navigator?.clipboard) {
@@ -209,6 +289,19 @@ export default function NoteClient({
 
 
   //Customize URL 
+=======
+  // ---------- Share Links ----------
+  const copyEditableLink = () => {
+    navigator.clipboard.writeText(`${window.location.origin}/${noteId}`);
+    alert("✅ Editable link copied!");
+  };
+  const copyReadOnlyLink = () => {
+    navigator.clipboard.writeText(`${window.location.origin}/${noteId}?readonly=true`);
+    alert("🔗 Read-only link copied!");
+  };
+
+  // ---------- Customize URL ----------
+>>>>>>> 780461f4a5f7a0a7aec153226935fdca1fcf335e
   const customizeUrl = async () => {
     if (!newUrlName) return alert("Enter a valid name.");
     try {
@@ -222,6 +315,7 @@ export default function NoteClient({
       alert("✅ URL updated!");
       setShowRenameBox(false);
       router.replace(`/${newUrlName}`);
+<<<<<<< HEAD
     } catch (err) {
       alert("❌ " + err);
     }
@@ -252,10 +346,37 @@ export default function NoteClient({
       return;
     }
     const updateCountdown = () => {
+=======
+    } catch (err: any) {
+      alert("❌ " + err.message);
+    }
+  };
+
+  // ---------- Expiry Timer ----------
+  const handleExpiryChange = async (value: string) => {
+    setExpiryTime(value);
+    let expiryTimestamp = null;
+    if (value === "1h") expiryTimestamp = Date.now() + 3600000;
+    else if (value === "1d") expiryTimestamp = Date.now() + 86400000;
+    else if (value === "7d") expiryTimestamp = Date.now() + 604800000;
+
+    setExpiryTimestamp(expiryTimestamp);
+    await fetch(`/api/notes/${noteId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ expiryTimestamp }),
+    });
+  };
+
+  useEffect(() => {
+    if (!expiryTimestamp) return;
+    const interval = setInterval(() => {
+>>>>>>> 780461f4a5f7a0a7aec153226935fdca1fcf335e
       const remaining = expiryTimestamp - Date.now();
       if (remaining <= 0) {
         setTimeLeft("Expired");
         clearInterval(interval);
+<<<<<<< HEAD
         alert("🗑️ This note has expired!");
         router.push("/");
         return;
@@ -798,3 +919,262 @@ export default function NoteClient({
     </div>
   );
 }
+=======
+        fetch(`/api/notes/${noteId}`, { method: "DELETE" });
+        alert("🗑 This note has expired!");
+        router.push("/");
+      } else {
+        const hrs = Math.floor(remaining / 3600000);
+        const mins = Math.floor((remaining % 3600000) / 60000);
+        const secs = Math.floor((remaining % 60000) / 1000);
+        setTimeLeft(`${hrs}h ${mins}m ${secs}s`);
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [expiryTimestamp, noteId, router]);
+
+  // ---------- UI ----------
+  return (
+    <div
+      style={{
+        backgroundColor: darkMode ? "#1e1e1e" : "#f8f9fb",
+        color: darkMode ? "#eee" : "#333",
+        height: "100vh",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        flexDirection: "column",
+        fontFamily: "sans-serif",
+        position: "relative",
+      }}
+    >
+      {/* ---------- Top Bar ---------- */}
+      <div
+        style={{
+          width: "85%",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "10px",
+        }}
+      >
+        <h2 style={{ color: darkMode ? "#ddd" : "#444", fontWeight: "500" }}>📝 NoteSpace</h2>
+
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          {saving && <span style={{ color: "#999" }}>Saving...</span>}
+          {saved && <span style={{ color: "green" }}>✓ Saved ({lastSaved})</span>}
+
+          {!isReadOnly && (
+            <>
+              <button
+                onClick={() => setShowPasswordPrompt(true)}
+                style={{
+                  backgroundColor: "#c27ad8",
+                  color: "#fff",
+                  border: "none",
+                  padding: "6px 12px",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                }}
+              >
+                🔒 Set Password
+              </button>
+
+              <button
+                onClick={() => setShowRenameBox(true)}
+                style={{
+                  backgroundColor: "#a78bfa",
+                  color: "#fff",
+                  border: "none",
+                  padding: "6px 12px",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                }}
+              >
+                ✏ Customize URL
+              </button>
+
+              <span
+                onClick={() => setDarkMode(!darkMode)}
+                style={{ cursor: "pointer", fontSize: "20px" }}
+                title="Toggle Dark/Light Mode"
+              >
+                {darkMode ? "🌞" : "🌙"}
+              </span>
+
+              <span
+                onClick={createNewNote}
+                style={{
+                  cursor: "pointer",
+                  fontSize: "22px",
+                  backgroundColor: "#c27ad8",
+                  color: "#fff",
+                  width: "32px",
+                  height: "32px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  borderRadius: "50%",
+                  boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
+                }}
+                title="New Note"
+              >
+                ＋
+              </span>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* ---------- Text Area ---------- */}
+      <div
+        style={{
+          backgroundColor: darkMode ? "#2b2b2b" : "#fff",
+          width: "85%",
+          height: "80%",
+          border: "1px solid #ddd",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+          borderRadius: "6px",
+          overflow: "hidden",
+          position: "relative",
+        }}
+      >
+        <textarea
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          placeholder={isLocked ? "🔒 Protected note" : "Start typing..."}
+          readOnly={isLocked || isReadOnly}
+          style={{
+            width: "100%",
+            height: "100%",
+            padding: "16px",
+            border: "none",
+            outline: "none",
+            fontSize: "15px",
+            resize: "none",
+            fontFamily: "monospace",
+            color: darkMode ? "#eee" : "#333",
+            backgroundColor: darkMode ? "#2b2b2b" : "#fff",
+          }}
+        />
+
+        {expiryTimestamp && (
+          <div
+            style={{
+              position: "absolute",
+              bottom: "8px",
+              right: "12px",
+              color: darkMode ? "#bbb" : "#666",
+              fontSize: "13px",
+            }}
+          >
+            ⏳ {timeLeft}
+          </div>
+        )}
+      </div>
+
+      {/* ---------- Bottom Section ---------- */}
+      <div style={{ marginTop: "10px", display: "flex", gap: "10px", alignItems: "center" }}>
+        {!isReadOnly && (
+          <>
+            <button onClick={copyEditableLink}>🔗 Editable Link</button>
+            <button onClick={copyReadOnlyLink}>↗ Share Link</button>
+
+            <label>Expire in —</label>
+            <select
+              value={expiryTime}
+              onChange={(e) => handleExpiryChange(e.target.value)}
+              style={{ padding: "4px", borderRadius: "4px" }}
+            >
+              <option value="never">Never</option>
+              <option value="1h">1 hour</option>
+              <option value="1d">1 day</option>
+              <option value="7d">7 days</option>
+            </select>
+          </>
+        )}
+      </div>
+
+      {/* ---------- Password Modal ---------- */}
+      {showPasswordPrompt && (
+        <div
+          style={{
+            position: "absolute",
+            top: 0, left: 0, width: "100%", height: "100%",
+            background: "rgba(0,0,0,0.3)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <div
+            style={{
+              background: darkMode ? "#2b2b2b" : "#fff",
+              padding: "20px",
+              borderRadius: "8px",
+              boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
+              width: "300px",
+              textAlign: "center",
+            }}
+          >
+            <h3>{isLocked ? "Unlock Note" : "Set Password"}</h3>
+            <input
+              type="password"
+              placeholder="Enter password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              style={{ width: "100%", padding: "8px", margin: "10px 0" }}
+            />
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              {isLocked ? (
+                <button onClick={unlockNote}>Unlock</button>
+              ) : (
+                <button onClick={lockNote}>Set</button>
+              )}
+              <button onClick={() => setShowPasswordPrompt(false)}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ---------- Rename Modal ---------- */}
+      {showRenameBox && (
+        <div
+          style={{
+            position: "absolute",
+            top: 0, left: 0, width: "100%", height: "100%",
+            background: "rgba(0,0,0,0.3)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <div
+            style={{
+              background: darkMode ? "#2b2b2b" : "#fff",
+              padding: "20px",
+              borderRadius: "8px",
+              boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
+              width: "300px",
+              textAlign: "center",
+            }}
+          >
+            <h3>Customize URL</h3>
+            <input
+              type="text"
+              placeholder="Enter new URL name"
+              value={newUrlName}
+              onChange={(e) => setNewUrlName(e.target.value)}
+              style={{ width: "100%", padding: "8px", margin: "10px 0" }}
+            />
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <button onClick={customizeUrl}>Save</button>
+              <button onClick={() => setShowRenameBox(false)}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+>>>>>>> 780461f4a5f7a0a7aec153226935fdca1fcf335e

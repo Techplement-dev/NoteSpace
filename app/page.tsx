@@ -36,7 +36,14 @@ export default function Home() {
         fontFamily: "sans-serif",
       }}
     >
+<<<<<<< HEAD
 🪄 Just a moment — setting up your note...
     </div>
   );
 }
+=======
+      Creating your note...
+    </div>
+  );
+}
+>>>>>>> 780461f4a5f7a0a7aec153226935fdca1fcf335e

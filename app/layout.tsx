@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -27,6 +28,17 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+=======
+export const metadata = {
+  title: "notespace",
+  description: "Online notepad for writing and sharing notes",
+};
+
+export default function RootLayout({ children }) {
+  return (
+    <html lang="en">
+      <body className="min-h-screen flex flex-col items-center justify-center bg-[#f8f9fb] text-gray-900">
+>>>>>>> 780461f4a5f7a0a7aec153226935fdca1fcf335e
         {children}
       </body>
     </html>

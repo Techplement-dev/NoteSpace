@@ -15,4 +15,8 @@ const eslintConfig = defineConfig([
   ]),
 ]);
 
+<<<<<<< HEAD
 export default eslintConfig;
+=======
+export default eslintConfig;
+>>>>>>> 780461f4a5f7a0a7aec153226935fdca1fcf335e

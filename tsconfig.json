@@ -29,6 +29,12 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     "**/*.mts"
+<<<<<<< HEAD
 , "lib/dbConnect.js"  ],
   "exclude": ["node_modules"]
 }
+=======
+  ],
+  "exclude": ["node_modules"]
+}
+>>>>>>> 780461f4a5f7a0a7aec153226935fdca1fcf335e
