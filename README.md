@@ -80,8 +80,7 @@ Provide password & read-only protection
 Maintain fast, responsive performance across devices
 
 
-
-Folder Structure:
+## 📁 Folder Structure
     
     note-space/
     ├─ app/
@@ -156,6 +155,7 @@ To deploy:
 4. Deploy
 
 ---
+
 
 
 
